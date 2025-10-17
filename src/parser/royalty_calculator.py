@@ -15,10 +15,16 @@ Usage:
 import openpyxl
 from typing import Dict, List, Optional
 from dataclasses import dataclass, asdict
+import os
+from openai import OpenAI
+from dotenv import load_dotenv
+import streamlit as st  # Safe to import here
+
+# Load environment variables
+load_dotenv()
 
 # Import the contract parser
-from .contract_parser import MusicContractParser, ContractData
-
+from parser.contract_parser import MusicContractParser
 @dataclass
 class RoyaltyPayment:
     #Represents a calculated royalty payment
@@ -35,7 +41,17 @@ class RoyaltyCalculator:
     #Calculate royalty payments from statements and contracts
 
     def __init__(self):
-        self.contract_parser = MusicContractParser()
+        # Load the API key from Streamlit or .env
+        api_key = (
+            st.secrets.get("OPENAI_API_KEY")
+            or os.getenv("OPENAI_API_KEY")
+        )
+
+        if not api_key or not api_key.startswith("sk-"):
+            raise ValueError("❌ OpenAI API key missing. Please add it to Streamlit Secrets or .env.")
+
+        # Pass key explicitly to avoid missing context
+        self.contract_parser = MusicContractParser(api_key=api_key)
     
     def read_royalty_statement(self, excel_path: str, title_column: str = None, 
                               payable_column: str = None) -> Dict[str, float]:
