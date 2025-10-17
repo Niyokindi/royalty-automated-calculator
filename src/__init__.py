@@ -1,2 +1,2 @@
-from parser.contract_parser import MusicContractParser
-from parser.royalty_calculator import RoyaltyCalculator
+from src.parser.contract_parser import MusicContractParser
+from src.parser.royalty_calculator import RoyaltyCalculator
