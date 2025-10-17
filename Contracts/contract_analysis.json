@@ -1,0 +1,53 @@
+{
+  "parties": [
+    {
+      "name": "Jasmine Samadhin",
+      "role": "artist",
+      "additional_info": "Also referred to as Jasmine Kiara; retains master rights and synchronization licenses"
+    },
+    {
+      "name": "John Doe",
+      "role": "producer",
+      "additional_info": "Referred to as Producer in the agreement"
+    },
+    {
+      "name": "Rahiim Bray",
+      "role": "songwriter",
+      "additional_info": "Credited as a lyrical writer of the song"
+    }
+  ],
+  "works": [
+    {
+      "title": "Problematic",
+      "work_type": "Song",
+      "additional_info": "Recorded work created under the agreement; Jasmine Kiara retains master rights and synchronization licenses."
+    }
+  ],
+  "royalty_shares": [
+    {
+      "party_name": "Jasmine Kiara",
+      "royalty_type": "publishing",
+      "percentage": 30.0,
+      "terms": "split equally"
+    },
+    {
+      "party_name": "John Doe",
+      "royalty_type": "publishing",
+      "percentage": 30.0,
+      "terms": "split equally"
+    },
+    {
+      "party_name": "Jasmine Kiara",
+      "royalty_type": "streaming",
+      "percentage": 30.0,
+      "terms": "net revenue from streaming and purchasing"
+    },
+    {
+      "party_name": "John Doe",
+      "royalty_type": "streaming",
+      "percentage": 30.0,
+      "terms": "net revenue from streaming and purchasing"
+    }
+  ],
+  "contract_summary": "The main parties in this music production agreement are Jasmine Samadhin, also known as Jasmine Kiara, the Artist, and John Doe, the Producer. The contract concerns the production of the song \"Problematic,\" with Jasmine Kiara retaining master rights and both parties equally splitting publishing rights and royalties, each receiving 30%. Jasmine Kiara holds exclusive rights to public performance, synchronization, and digital transmission of the song, and is responsible for collecting and distributing royalties to the Producer, with payments made quarterly. The agreement also stipulates that Jasmine Kiara and Rahiim Bray are credited as the sole lyrical writers of the song."
+}

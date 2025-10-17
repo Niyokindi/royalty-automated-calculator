@@ -1,0 +1,20 @@
+[
+  {
+    "song_title": "Uncommitted",
+    "party_name": "John Doe",
+    "role": "producer",
+    "royalty_type": "streaming",
+    "percentage": 30.0,
+    "total_royalty": 42.957665086443285,
+    "amount_to_pay": 12.887299525932985
+  },
+  {
+    "song_title": "Uncommitted",
+    "party_name": "Jasmine Kiara",
+    "role": "artist",
+    "royalty_type": "streaming",
+    "percentage": 30.0,
+    "total_royalty": 42.957665086443285,
+    "amount_to_pay": 12.887299525932985
+  }
+]

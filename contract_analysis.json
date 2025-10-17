@@ -1,0 +1,41 @@
+{
+  "parties": [
+    {
+      "name": "Romes Isaiah",
+      "role": "artist",
+      "additional_info": "Retains master rights and synchronization licenses; sole lyrical writer"
+    },
+    {
+      "name": "Lebron James",
+      "role": "producer",
+      "additional_info": "Referred to as Producer in the agreement"
+    },
+    {
+      "name": "Kenji",
+      "role": "songwriter",
+      "additional_info": "Sole lyrical writer of the song"
+    }
+  ],
+  "works": [
+    {
+      "title": "Home",
+      "work_type": "Song",
+      "additional_info": "Recorded work under the agreement; Romes Isaiah retains master rights and synchronization licenses."
+    }
+  ],
+  "royalty_shares": [
+    {
+      "party_name": "Romes Isaiah",
+      "royalty_type": "publishing",
+      "percentage": 25.0,
+      "terms": "split equally"
+    },
+    {
+      "party_name": "Romes Isaiah",
+      "royalty_type": "streaming",
+      "percentage": 25.0,
+      "terms": "net revenue from streaming and purchasing"
+    }
+  ],
+  "contract_summary": "The main parties in this music production agreement are Romes Isaiah (the \"Artist\") and an unnamed Producer, referred to as Lebron James. The contract concerns the production and rights associated with the song \"Home.\" Romes Isaiah retains the master rights and has full authority over synchronization licenses, while both parties equally split the publishing rights and royalties, each receiving 25%. The Producer will provide music production services, and royalties are to be paid quarterly, with specific terms for accounting and payment methods."
+}
