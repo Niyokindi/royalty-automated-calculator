@@ -66,20 +66,27 @@ class ContractData:
 
 class MusicContractParser:
     #Parser for music contracts using GPT-4
-    
     def __init__(self, api_key: Optional[str] = None):
         """
-        Initialize the parser with OpenAI API key
-        
-        Args:
-            api_key: OpenAI API key (defaults to OPENAI_API_KEY env variable)
+        Initialize the parser with OpenAI API key.
+        Works in both local and Streamlit Cloud environments.
         """
-        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
+
+        import streamlit as st  # Safe to import here
+
+        # Load API key from: parameter → secrets → env
+        self.api_key = (
+            api_key
+            or st.secrets.get("OPENAI_API_KEY")
+            or os.getenv("OPENAI_API_KEY")
+        )
+
         if not self.api_key:
-            raise ValueError("OpenAI API key must be provided or set in OPENAI_API_KEY environment variable")
-        
+            raise ValueError("❌ OpenAI API key not found. Add it to Streamlit secrets or .env file.")
+
         self.client = OpenAI(api_key=self.api_key)
         self.model = "gpt-4o"  # Using GPT-4 Omni for better performance
+    
     
     def extract_text_from_file(self, file_path: str) -> str:
         """
