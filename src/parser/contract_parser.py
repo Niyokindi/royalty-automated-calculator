@@ -24,6 +24,7 @@ import fitz  # PyMuPDF
 import openpyxl
 from openai import OpenAI
 from dotenv import load_dotenv
+import streamlit as st  # Safe to import here
 
 # Load environment variables
 load_dotenv()
@@ -72,7 +73,7 @@ class MusicContractParser:
         Works in both local and Streamlit Cloud environments.
         """
 
-        import streamlit as st  # Safe to import here
+        
 
         # Load API key from: parameter → secrets → env
         self.api_key = (
@@ -80,6 +81,7 @@ class MusicContractParser:
             or st.secrets.get("OPENAI_API_KEY")
             or os.getenv("OPENAI_API_KEY")
         )
+        st.write("✅ Loaded API key?", bool(self.api_key))
 
         if not self.api_key:
             raise ValueError("❌ OpenAI API key not found. Add it to Streamlit secrets or .env file.")
