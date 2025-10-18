@@ -81,7 +81,7 @@ class MusicContractParser:
             or st.secrets.get("OPENAI_API_KEY")
             or os.getenv("OPENAI_API_KEY")
         )
-        st.write("✅ Loaded API key?", bool(self.api_key))
+        
 
         if not self.api_key:
             raise ValueError("❌ OpenAI API key not found. Add it to Streamlit secrets or .env file.")
