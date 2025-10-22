@@ -24,7 +24,7 @@ import streamlit as st  # Safe to import here
 load_dotenv()
 
 # Import the contract parser
-from parser.contract_parser import MusicContractParser
+from parser.contract_parser import MusicContractParser, ContractData, Party, Work, RoyaltyShare
 @dataclass
 class RoyaltyPayment:
     #Represents a calculated royalty payment
@@ -225,6 +225,95 @@ class RoyaltyCalculator:
             else:
                 print(f"⚠ Warning: '{work.title}' not found in royalty statement")
         
+        return payments
+    
+    def merge_contracts(self, contracts: list[ContractData]) -> ContractData:
+        """
+        Merge multiple ContractData objects for the same work.
+        
+        This combines parties, works, and royalty shares while removing duplicates.
+        If the same contributor appears in multiple contracts, all of their shares
+        are preserved (can be summed later when calculating payouts).
+        """
+        merged_parties = []
+        merged_works = []
+        merged_royalty_shares = []
+        summaries = []
+
+        seen_parties = set()
+        seen_works = set()
+
+        for contract in contracts:
+            summaries.append(contract.contract_summary or "")
+
+            # Merge unique parties
+            for p in contract.parties:
+                if p.name.lower() not in seen_parties:
+                    merged_parties.append(p)
+                    seen_parties.add(p.name.lower())
+
+            # Merge unique works
+            for w in contract.works:
+                if w.title.lower() not in seen_works:
+                    merged_works.append(w)
+                    seen_works.add(w.title.lower())
+
+            # Keep all royalty shares (duplicates can be handled later)
+            merged_royalty_shares.extend(contract.royalty_shares)
+
+        merged_summary = "\n".join([s for s in summaries if s.strip()])
+
+        return ContractData(
+            parties=merged_parties,
+            works=merged_works,
+            royalty_shares=merged_royalty_shares,
+            contract_summary=merged_summary
+        )
+    
+    def calculate_payments_from_contracts(
+        self,
+        contract_paths: list[str],
+        statement_path: str,
+        title_column: str = None,
+        payable_column: str = None  
+    ):
+        """
+        Parse multiple contracts, merge their data, and calculate payments.
+
+        Args:
+            contract_paths: List of paths to contract files (PDF or Excel)
+            statement_path: Path to the royalty statement file
+            title_column: Optional column name for song titles in statement
+            payable_column: Optional column name for payable amounts
+
+        Returns:
+            List of RoyaltyPayment objects with combined results
+        """
+        print(f"\nParsing {len(contract_paths)} contracts...")
+
+        # Step 1 — Parse each contract using GPT-based parser
+        all_contracts_data = []
+        for path in contract_paths:
+            try:
+                data = self.contract_parser.parse_contract(path)
+                all_contracts_data.append(data)
+            except Exception as e:
+                print(f"Warning: Failed to parse {path}: {e}")
+
+        if not all_contracts_data:
+            raise ValueError(" No valid contracts could be parsed. Please check your uploads.")
+
+        # Step 2 — Merge all contract data
+        merged_data = self.merge_contracts(all_contracts_data)
+        print(f"Merged {len(all_contracts_data)} contracts into one combined dataset")
+
+        # Step 3 — Use the merged contract data to calculate payouts
+        payments = self.calculate_payments(
+            merged_data,
+            statement_path,
+        )
+
+        print(f"Calculated payments for {len(payments)} contributors")
         return payments
     
     def _find_matching_song(self, song_title: str, song_totals: Dict[str, float]) -> tuple:
