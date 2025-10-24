@@ -227,41 +227,62 @@ class RoyaltyCalculator:
         
         return payments
     
+
     def merge_contracts(self, contracts: list[ContractData]) -> ContractData:
         """
         Merge multiple ContractData objects for the same work.
-        
-        This combines parties, works, and royalty shares while removing duplicates.
-        If the same contributor appears in multiple contracts, all of their shares
-        are preserved (can be summed later when calculating payouts).
+        Combines parties, works, and royalty shares safely.
+        Ensures no contributor is lost due to name formatting or overlap.
         """
+
         merged_parties = []
         merged_works = []
         merged_royalty_shares = []
         summaries = []
 
+        # Helper function to normalize names
+        def normalize_name(name: str) -> str:
+            if not name:
+                return ""
+            # Lowercase, strip spaces and role annotations
+            clean = re.sub(r"\(.*?\)", "", name).strip().lower()
+            return clean
+
         seen_parties = set()
         seen_works = set()
+        seen_shares = set()  # prevent duplicate (party, type, %) combos
 
         for contract in contracts:
             summaries.append(contract.contract_summary or "")
 
-            # Merge unique parties
+            # Merge parties
             for p in contract.parties:
-                if p.name.lower() not in seen_parties:
+                norm_name = normalize_name(p.name)
+                if norm_name and norm_name not in seen_parties:
                     merged_parties.append(p)
-                    seen_parties.add(p.name.lower())
+                    seen_parties.add(norm_name)
 
-            # Merge unique works
+            # Merge works
             for w in contract.works:
-                if w.title.lower() not in seen_works:
+                norm_title = (w.title or "").strip().lower()
+                if norm_title and norm_title not in seen_works:
                     merged_works.append(w)
-                    seen_works.add(w.title.lower())
+                    seen_works.add(norm_title)
 
-            # Keep all royalty shares (duplicates can be handled later)
-            merged_royalty_shares.extend(contract.royalty_shares)
+            # Merge royalty shares, but avoid duplicates
+            for r in contract.royalty_shares:
+                key = (
+                    normalize_name(r.party_name),
+                    r.royalty_type.lower().strip(),
+                    round(float(r.percentage), 2)
+                )
+                if key not in seen_shares:
+                    merged_royalty_shares.append(r)
+                    seen_shares.add(key)
 
         merged_summary = "\n".join([s for s in summaries if s.strip()])
+
+        print(f"✅ Merged {len(merged_parties)} parties, {len(merged_works)} works, and {len(merged_royalty_shares)} royalty entries.")
 
         return ContractData(
             parties=merged_parties,
@@ -269,6 +290,7 @@ class RoyaltyCalculator:
             royalty_shares=merged_royalty_shares,
             contract_summary=merged_summary
         )
+
     def calculate_payments_from_data(
         self,
         contract_data,  # type: ContractData
