@@ -269,13 +269,97 @@ class RoyaltyCalculator:
             royalty_shares=merged_royalty_shares,
             contract_summary=merged_summary
         )
-    
+    def calculate_payments_from_data(
+        self,
+        contract_data,  # type: ContractData
+        statement_path: str,
+        title_column: str = None,
+        payable_column: str = None
+    ):
+        """
+        Calculate payments for all parties based on a parsed ContractData object
+        and a royalty statement file.
+
+        Args:
+            contract_data: Parsed and possibly merged ContractData object.
+            statement_path: Path to the royalty statement (Excel).
+            title_column: Optional name of title column in the statement.
+            payable_column: Optional name of payable column in the statement.
+
+        Returns:
+            List of RoyaltyPayment objects with calculated amounts.
+        """
+        print("\n" + "="*80)
+        print("ROYALTY PAYMENT CALCULATION (from parsed contract data)")
+        print("="*80)
+
+        # Step 1 — Validate contract data
+        if not contract_data.works:
+            raise ValueError("❌ No works found in the provided contract data.")
+        if not contract_data.royalty_shares:
+            raise ValueError("❌ No royalty share data found in the provided contract data.")
+
+        # Step 2 — Read royalty statement
+        print("\n📊 Reading royalty statement...")
+        song_totals = self.read_royalty_statement(statement_path, title_column, payable_column)
+        if not song_totals:
+            raise ValueError("❌ No songs found in the royalty statement.")
+
+        # Step 3 — Filter for streaming royalties
+        streaming_shares = [
+            share for share in contract_data.royalty_shares
+            if "streaming" in share.royalty_type.lower()
+        ]
+
+        if not streaming_shares:
+            print("⚠️ No streaming royalty shares found in this contract data.")
+            return []
+
+        # Step 4 — Calculate payments
+        print("\n💰 Calculating payments...\n")
+        payments = []
+
+        for work in contract_data.works:
+            # Find matching song title in the royalty statement (fuzzy match)
+            matching_song, total_royalty = self._find_matching_song(work.title, song_totals)
+
+            if matching_song:
+                print(f"✓ Found '{work.title}' in statement: ${total_royalty:,.2f} total royalties")
+
+                for share in streaming_shares:
+                    amount_to_pay = total_royalty * (share.percentage / 100.0)
+
+                    # Try to find party details
+                    party = next(
+                        (p for p in contract_data.parties if p.name.lower() == share.party_name.lower()),
+                        None
+                    )
+                    role = party.role if party else "Unknown"
+
+                    payment = RoyaltyPayment(
+                        song_title=work.title,
+                        party_name=share.party_name,
+                        role=role,
+                        royalty_type=share.royalty_type,
+                        percentage=share.percentage,
+                        total_royalty=total_royalty,
+                        amount_to_pay=amount_to_pay
+                    )
+                    payments.append(payment)
+
+                    print(f"  → {share.party_name} ({role}): {share.percentage}% = ${amount_to_pay:,.2f}")
+
+            else:
+                print(f"⚠️ Warning: '{work.title}' not found in royalty statement")
+
+        # Step 5 — Return final payments
+        print(f"\n✅ Calculated {len(payments)} payments total")
+        return payments
+
     def calculate_payments_from_contracts(
         self,
         contract_paths: list[str],
-        statement_path: str,
-        title_column: str = None,
-        payable_column: str = None  
+        statement_path: str, 
     ):
         """
         Parse multiple contracts, merge their data, and calculate payments.
@@ -308,7 +392,7 @@ class RoyaltyCalculator:
         print(f"Merged {len(all_contracts_data)} contracts into one combined dataset")
 
         # Step 3 — Use the merged contract data to calculate payouts
-        payments = self.calculate_payments(
+        payments = self.calculate_payments_from_data(
             merged_data,
             statement_path,
         )
