@@ -218,14 +218,16 @@ def main():
     
     with col1:
         st.subheader("📄 Upload Contract")
-        contract_file = st.file_uploader(
-            "Upload contract file",
+        contract_files = st.file_uploader(
+            "Upload contract(s) file",
             type=['pdf', 'xlsx', 'xls'],
-            help="Upload the music contract (PDF or Excel format)"
+            help="Upload the music contract (PDF or Excel format)",
+            accept_multiple_files = True
         )
         
-        if contract_file:
-            st.success(f"{contract_file.name} uploaded successfully")
+        if contract_files:
+            for file in contract_files:
+                st.success(f"{file.name} uploaded")
     
     with col2:
         st.subheader("📊 Upload Royalty Statement")
@@ -241,32 +243,44 @@ def main():
     st.markdown("---")
     
     # Calculate button
-    if contract_file and statement_file:
+    if contract_files and statement_file:
         if st.button("Calculate Payments", type="primary", use_container_width=True):
             with st.spinner("Processing files... This may take a moment."):
                 try:
-                    # Save uploaded files
-                    contract_path = save_uploaded_file(contract_file)
+                    # Save uploaded statement
                     statement_path = save_uploaded_file(statement_file)
-                    
-                    if not contract_path or not statement_path:
-                        st.error("Failed to process uploaded files")
-                        return
-                    
+                    if not statement_path:
+                        st.error("Failed to process royalty statement")
+                        st.stop()
+
+                    # Save all contract files
+                    contract_paths = []
+                    for contract_file in contract_files:
+                        path = save_uploaded_file(contract_file)
+                        if path:
+                            contract_paths.append(path)
+
+                    if not contract_paths:
+                        st.error("No valid contract files were processed")
+                        st.stop()
+
                     # Initialize calculator
                     calculator = RoyaltyCalculator()
-                    payments = calculator.calculate_payments(contract_path, statement_path)
-                    
-                    # Store in session state
-                    st.session_state['payments'] = payments
-                    st.session_state['calculator'] = calculator
-                    
+
+                    # New method that handles multiple contracts
+                    payments = calculator.calculate_payments_from_contracts(contract_paths, statement_path)
+
+                    # Store results in session state
+                    st.session_state["payments"] = payments
+                    st.session_state["calculator"] = calculator
+
                     # Clean up temp files
-                    os.unlink(contract_path)
+                    for path in contract_paths:
+                        os.unlink(path)
                     os.unlink(statement_path)
-                    
-                    st.success("✅ Payments calculated successfully!")
-                    
+
+                    st.success(f"✅ Processed {len(contract_paths)} contracts and calculated payments successfully!")
+
                 except Exception as e:
                     st.error(f"❌ Error: {str(e)}")
                     st.exception(e)
@@ -345,7 +359,7 @@ def main():
         except Exception as e:
             st.error(f"Error creating Excel file: {str(e)}")
     
-    elif contract_file and statement_file:
+    elif contract_files and statement_file:
         st.info("Click 'Calculate Payments' to process your files")
     else:
         st.info("Please upload both contract and royalty statement files to begin")
