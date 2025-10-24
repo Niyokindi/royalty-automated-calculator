@@ -47,7 +47,7 @@ class RoyaltyCalculator:
             st.secrets.get("OPENAI_API_KEY")
             or os.getenv("OPENAI_API_KEY")
         )
-
+       
         if not api_key or not api_key.startswith("sk-"):
             raise ValueError("❌ OpenAI API key missing. Please add it to Streamlit Secrets or .env.")
 
@@ -419,6 +419,14 @@ class RoyaltyCalculator:
             merged_data,
             statement_path,
         )
+        print(f"\n=== {os.path.basename(path)} ===")
+        print("👥 Parties:")
+        for p in data.parties:
+            print(f"  - {p.name} ({p.role})")
+        print("💰 Royalty Shares:")
+        for r in data.royalty_shares:
+            print(f"  - {r.party_name}: {r.percentage}% ({r.royalty_type})")
+
 
         print(f"Calculated payments for {len(payments)} contributors")
         return payments
