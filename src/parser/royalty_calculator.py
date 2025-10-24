@@ -18,6 +18,7 @@ from dataclasses import dataclass, asdict
 import os
 from openai import OpenAI
 from dotenv import load_dotenv
+import re
 import streamlit as st  # Safe to import here
 
 # Load environment variables
