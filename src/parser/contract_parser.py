@@ -76,12 +76,12 @@ class MusicContractParser:
         
 
         # Load API key from: parameter → secrets → env
-        # self.api_key = (
-        #     api_key
-        #     or st.secrets.get("OPENAI_API_KEY")
-        #     or os.getenv("OPENAI_API_KEY")
-        # )
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = (
+            api_key
+            or st.secrets.get("OPENAI_API_KEY")
+            or os.getenv("OPENAI_API_KEY")
+        )
+        # self.api_key = os.getenv("OPENAI_API_KEY")
             
             
         
